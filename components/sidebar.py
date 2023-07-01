@@ -66,10 +66,14 @@ layout = dbc.Col([
                             dbc.Label("Extras"),
                             dbc.Checklist(
                                 options=['Foi recebida', 'Receita Recorrente'],
-                                value=[],
+                                value=[1,2],
                                 id='switches-input-receita',
                                 switch=True
                             ),
+                            dbc.Row([
+                                dbc.Label("Quantidade:"),
+                                dbc.Input(placeholder="10", id="quantidade-receita-recorrente", value="")
+                            ]),
 
                         ], width=4),
                         dbc.Col([
@@ -153,7 +157,12 @@ layout = dbc.Col([
                                 value=[1],
                                 id='switches-input-despesa',
                                 switch=True
-                            )
+                            ),
+                            dbc.Row([
+                                dbc.Label("Quantidade:"),
+                                dbc.Input(placeholder="10", id="quantidade-despesa-recorrente", value="")
+                            ]),
+                            
                         ], width=4),
                         dbc.Col([
                             html.Label('Categoria da despesa'),
@@ -249,13 +258,13 @@ def toggle_modal(n1, is_open):
         State('valor_receita', 'value'),
         State('date-receitas', 'date'),
         State('switches-input-receita', 'value'),
+        State("quantidade-receita-recorrente", 'value'),
         State('select_receita', 'value'),
         State('store-receitas', 'data')
     ]
 )
-def salve_form_receita(n, descricao, valor, date, switches, categoria, dict_receitas):
-    #import pdb
-    #pdb.set_trace()
+def salve_form_receita(n, descricao, valor, date, switches, quantidade, categoria, dict_receitas):
+    import pdb
     df_receitas = pd.DataFrame(dict_receitas)
 
     if n and not (valor == "" or valor == None):
@@ -264,9 +273,19 @@ def salve_form_receita(n, descricao, valor, date, switches, categoria, dict_rece
         categoria = categoria[0]
         recebido = 1 if 1 in switches else 0
         fixo = 1 if 2 in switches else 0
+        quantidade = int(quantidade)
+        #pdb.set_trace()
 
-        df_receitas.loc[df_receitas.shape[0]] = [valor, recebido, fixo, date, categoria, descricao]
-        df_receitas.to_csv("df_receitas.csv")
+        if fixo == 1:
+            for i in range(quantidade):
+                df_receitas.loc[df_receitas.shape[0]] = [valor, recebido, fixo, date, categoria, descricao]
+                #pdb.set_trace() 
+                df_receitas.to_csv("df_receitas.csv")
+                i += 1
+                #pdb.set_trace()  
+        else:
+            df_receitas.loc[df_receitas.shape[0]] = [valor, recebido, fixo, date, categoria, descricao]
+            df_receitas.to_csv("df_receitas.csv") 
 
     data_return = df_receitas.to_dict()
     return data_return
