@@ -1,3 +1,4 @@
+from dateutil.relativedelta import relativedelta
 import os
 import dash
 from dash import html, dcc
@@ -5,7 +6,7 @@ from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 from app import app
 
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 import plotly.express as px
 import numpy as np
 import pandas as pd
@@ -66,7 +67,7 @@ layout = dbc.Col([
                             dbc.Label("Extras"),
                             dbc.Checklist(
                                 options=['Foi recebida', 'Receita Recorrente'],
-                                value=[1,2],
+                                value=[],
                                 id='switches-input-receita',
                                 switch=True
                             ),
@@ -154,7 +155,7 @@ layout = dbc.Col([
                             dbc.Label("Extras"),
                             dbc.Checklist(
                                options=['Foi recebida', 'Despesa Recorrente'],
-                                value=[1],
+                                value=[],
                                 id='switches-input-despesa',
                                 switch=True
                             ),
@@ -272,17 +273,15 @@ def salve_form_receita(n, descricao, valor, date, switches, quantidade, categori
         date = pd.to_datetime(date).date()
         categoria = categoria[0]
         recebido = 1 if 1 in switches else 0
-        fixo = 1 if 2 in switches else 0
+        fixo = 1 if 'Receita Recorrente' in switches else 0
         quantidade = int(quantidade)
-        #pdb.set_trace()
 
         if fixo == 1:
             for i in range(quantidade):
                 df_receitas.loc[df_receitas.shape[0]] = [valor, recebido, fixo, date, categoria, descricao]
-                #pdb.set_trace() 
                 df_receitas.to_csv("df_receitas.csv")
-                i += 1
-                #pdb.set_trace()  
+                date = date + relativedelta(months=1)
+                i += 1 
         else:
             df_receitas.loc[df_receitas.shape[0]] = [valor, recebido, fixo, date, categoria, descricao]
             df_receitas.to_csv("df_receitas.csv") 
@@ -299,24 +298,37 @@ def salve_form_receita(n, descricao, valor, date, switches, quantidade, categori
         State('valor_despesa', 'value'),
         State('date-despesas', 'date'),
         State('switches-input-despesa', 'value'),
+        State("quantidade-despesa-recorrente", 'value'),
         State('select_despesa', 'value'),
         State('store-despesas', 'data')
     ]
 )
-def salve_form_despesa(n, descricao, valor, date, switches, categoria, dict_despesas):
-    #import pdb
-    #pdb.set_trace()
+def salve_form_despesa(n, descricao, valor, date, switches, quantidade, categoria, dict_despesas):
+    import pdb
+    pdb.set_trace()
     df_despesas = pd.DataFrame(dict_despesas)
 
     if n and not (valor == "" or valor == None):
         valor = round(float(valor),2)
         date = pd.to_datetime(date).date()
-        categoria = categoria[0] if type(categoria) == list else categoria
+        categoria = categoria if type(categoria) != list else categoria[0]
         recebido = 1 if 1 in switches else 0
-        fixo = 1 if 2 in switches else 0
+        fixo = 1 if 'Despesa Recorrente' in switches else 0
+        quantidade = int(quantidade)
+        pdb.set_trace()
 
-        df_despesas.loc[df_despesas.shape[0]] = [valor, recebido, fixo, date, categoria, descricao]
-        df_despesas.to_csv("df_despesas.csv")
+        if fixo == 1:
+            for i in range(quantidade):
+                pdb.set_trace()
+                df_despesas.loc[df_despesas.shape[0]] = [valor, recebido, fixo, date, categoria, descricao]
+                df_despesas.to_csv("df_despesas.csv")
+                pdb.set_trace()
+                date = date + relativedelta(months=1)
+                i += 1
+                pdb.set_trace()
+        else:
+            df_despesas.loc[df_despesas.shape[0]] = [valor, recebido, fixo, date, categoria, descricao]
+            df_despesas.to_csv("df_despesas.csv") 
 
     data_return = df_despesas.to_dict()
     return data_return
