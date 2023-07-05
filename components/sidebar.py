@@ -305,7 +305,6 @@ def salve_form_receita(n, descricao, valor, date, switches, quantidade, categori
 )
 def salve_form_despesa(n, descricao, valor, date, switches, quantidade, categoria, dict_despesas):
     import pdb
-    pdb.set_trace()
     df_despesas = pd.DataFrame(dict_despesas)
 
     if n and not (valor == "" or valor == None):
@@ -315,17 +314,13 @@ def salve_form_despesa(n, descricao, valor, date, switches, quantidade, categori
         recebido = 1 if 1 in switches else 0
         fixo = 1 if 'Despesa Recorrente' in switches else 0
         quantidade = int(quantidade)
-        pdb.set_trace()
 
         if fixo == 1:
             for i in range(quantidade):
-                pdb.set_trace()
                 df_despesas.loc[df_despesas.shape[0]] = [valor, recebido, fixo, date, categoria, descricao]
                 df_despesas.to_csv("df_despesas.csv")
-                pdb.set_trace()
                 date = date + relativedelta(months=1)
                 i += 1
-                pdb.set_trace()
         else:
             df_despesas.loc[df_despesas.shape[0]] = [valor, recebido, fixo, date, categoria, descricao]
             df_despesas.to_csv("df_despesas.csv") 
